@@ -37,15 +37,15 @@ class Mesh : public object
         for(auto iter = T.begin(); iter != T.end(); iter ++) if(*iter) delete(*iter);
     }
 
-    virtual vec3 normal(vec3 v) const {return vec3(1, 0, 0);} //do not use this
-    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal) const
+    virtual vec3 normal(vec3 v) {return vec3(1, 0, 0);} //do not use this
+    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal, vec3& color)
     {
         std::vector<object*> possible = tree.query(*ray, tree.root);
-        vec3 new_intersection, new_normal;
+        vec3 new_intersection, new_normal, new_color;
         double distance = INF;
         for(auto iter = possible.begin(); iter != possible.end(); iter ++)
         {
-            if((*iter)->intersect(ray, new_intersection, new_normal))
+            if((*iter)->intersect(ray, new_intersection, new_normal, new_color))
             {
                 double new_distance = (new_intersection - ray->origin).length();
                 if(new_distance < distance)
@@ -53,6 +53,7 @@ class Mesh : public object
                     distance = new_distance;
                     intersection = new_intersection;
                     normal = new_normal;
+                    color = new_color;
                 }
             }
         } 

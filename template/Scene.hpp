@@ -12,7 +12,7 @@
 #include "Loadobj.hpp"
 #include <fstream>
 #include <string>
-
+/*
 const vec3 controll[] =
 {
     vec3(13.5),
@@ -24,6 +24,19 @@ const vec3 controll[] =
     vec3(15.0, 35.0),
     vec3(15.0, 40.0),
     vec3(12.5, 40.0)
+};
+*/
+vec3 controll[] =
+{
+    vec3(7.50, 25.0),
+    vec3(9.375, 25.0),
+    vec3(9.375, 21.875),
+    vec3(9.375, 18.75),
+    vec3(9.375, 15.625),
+    vec3(7.8125, 12.5),
+    vec3(6.25,  6.25),
+    vec3(4.6875,  3.125),
+    vec3(8.4375,  0.0)
 };
 
 /*
@@ -60,7 +73,10 @@ int scene_size = 7;
 
 void init_scene()
 {
-    scene[0] = new r_Bezier(controll, 9, vec3(1, 1, 1), vec3(), 0, Coordinate(vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, 1, 0), vec3(0, 0, 0)), DIFF);
+    printf("Loading Object\n");
+    scene[0] = new r_Bezier(controll, 9, vec3(1, 1, 1), vec3(), 0, Coordinate(vec3(-1, 0, 0), vec3(0, 0, 1), vec3(0, -1, 0), vec3(0, 25, 0)), DIFF);
+    const char* texture_name = "/users/flagerlee/desktop/files/tsinghua/graphic/prj_2/vase.png";
+    scene[0]->texture.load_texture(texture_name);
     /*
     std::string obj_file_path = "/users/flagerlee/desktop/files/tsinghua/graphic/prj_2/bunny.obj";
     std::fstream obj_file;
@@ -77,4 +93,5 @@ void init_scene()
     scene[4] = new Plane(vec3(25, 0, 0), vec3(-1, 0, 0), vec3(0.75, 0.25, 0.25), vec3(), 0, Coordinate(), DIFF);
     scene[5] = new Plane(vec3(-25, 0, 0), vec3(1, 0, 0), vec3(0.25, 0.25, 0.75), vec3(), 0, Coordinate(), DIFF);
     scene[6] = new Sphere(vec3(0, 99, 0), 50.0, vec3(), vec3(12, 12, 12), 0, Coordinate(), DIFF);
+    printf("Finished\n");
 }

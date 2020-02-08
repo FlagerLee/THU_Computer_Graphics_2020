@@ -43,7 +43,7 @@ class AABB : public object
         co = Coordinate();
     }
 
-    virtual vec3 normal(vec3 v) const
+    virtual vec3 normal(vec3 v)
     {
         if(fabs(v.x - Max.x) < eps) return vec3(1, 0, 0);
         if(fabs(v.y - Max.y) < eps) return vec3(0, 1, 0);
@@ -52,7 +52,7 @@ class AABB : public object
         if(fabs(v.y - Min.y) < eps) return vec3(0, -1, 0);
         return vec3(0, 0, -1);
     }
-    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal) const
+    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal, vec3& color)
     {
         double t;
         t = (Max.x - ray->origin.x) / ray->direction.x;

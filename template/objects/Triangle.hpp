@@ -62,20 +62,12 @@ class Triangle : public object
         type = _type;
     }
 
-    virtual vec3 normal(vec3 v) const //v: (u, v, 0)
+    virtual vec3 normal(vec3 v)
     {
-        //normal interpolation
-        //is_inv = false
-        //ux + vy = u * (p1 - p0) + v * (p1 - p2) =>
-        //ux + vy = -p0 * u + p1 * (u + v) - p2 * v
-        //is_inv = true
-        //ux + vy = u * (p1 - p2) + v * (p1 - p0) =>
-        //ux + vy = -p0 * v + p1 * (u + v) - p2 * u
         if(is_inv) return v.x * v_normal[2] + v.y * v_normal[0] + (1 - v.x - v.y) * v_normal[1];
         else return v.x * v_normal[0] + v.y * v_normal[2] + (1 - v.x - v.y) * v_normal[1];
-        //return co.z_axis;
     }
-    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal) const
+    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal, vec3& color)
     {
         Ray new_ray;
         if(!(co == Coordinate())) new_ray = Ray(co.trans_point(ray->origin), co.trans_vector(ray->direction));
@@ -87,6 +79,7 @@ class Triangle : public object
         if(u + v > 1.0 || u < 0.0 || v < 0.0) return false;
         normal = this->normal(vec3(u, v));
         intersection = ray->origin + t * ray->direction;
+        color = this->color;
         //printf("intersection: %.5lf %.5lf %.5lf\nnormal: %.5f %.5f %.5f\n", intersection.x, intersection.y, intersection.z, normal.x, normal.y, normal.z);
         return true;
     }

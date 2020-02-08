@@ -11,12 +11,12 @@ vec3 pt(Ray ray, int depth)
     if(depth > MAXIMUM_DEPTH) return vec3(0, 0, 0); //keep the origin color
     int intersect_id = -1;
     double minimum_distance = INF;
-    vec3 intersection, normal;
+    vec3 intersection, normal, color;
     //find closest object
     for(int i = 0; i < scene_size; i ++)
     {
-        vec3 new_intersection, new_normal;
-        if(scene[i]->intersect(&ray, new_intersection, new_normal))
+        vec3 new_intersection, new_normal, new_color;
+        if(scene[i]->intersect(&ray, new_intersection, new_normal, new_color))
         {
             double new_distance = (new_intersection - ray.origin).length();
             if(new_distance < minimum_distance)
@@ -24,6 +24,7 @@ vec3 pt(Ray ray, int depth)
                 minimum_distance = new_distance;
                 intersection = new_intersection;
                 normal = new_normal;
+                color = new_color;
                 intersect_id = i;
             }
         }
@@ -38,22 +39,22 @@ vec3 pt(Ray ray, int depth)
         {
         case DIFF:
             new_ray = ray.diffuse(ray, intersection, normal);
-            ans = obj->emission + (obj->color ^ pt(new_ray, depth + 1));
+            ans = obj->emission + (color ^ pt(new_ray, depth + 1));
             break;
 
         case SPEC:
             new_ray = ray.reflect(ray, intersection, normal);
-            ans = obj->emission + (obj->color ^ pt(new_ray, depth + 1));
+            ans = obj->emission + (color ^ pt(new_ray, depth + 1));
             break;
 
         case REFR:
             R = ray.fersnel(ray, intersection, normal, obj->ratio);
             new_ray = ray.reflect(ray, intersection, normal);
-            if(fabs(R - 1.0) < eps) ans = obj->emission + (obj->color ^ pt(new_ray, depth + 1));
+            if(fabs(R - 1.0) < eps) ans = obj->emission + (color ^ pt(new_ray, depth + 1));
             else
             {
                 Ray new_refr_ray = ray.refract(ray, intersection, normal, obj->ratio);
-                ans = obj->emission + (obj->color ^ (R * pt(new_ray, depth + 1) + (1.0 - R) * pt(new_refr_ray, depth + 1)));
+                ans = obj->emission + (color ^ (R * pt(new_ray, depth + 1) + (1.0 - R) * pt(new_refr_ray, depth + 1)));
             }
             break;
         

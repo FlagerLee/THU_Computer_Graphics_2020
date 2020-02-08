@@ -19,13 +19,13 @@ class Cylinder : public object
         type = _type;
     }
 
-    virtual vec3 normal(vec3 v) const //v: (theta, height, 0)
+    virtual vec3 normal(vec3 v) //v: (theta, height, 0)
     {
         if(fabs(v.y - height) < eps) return vec3(0, 0, 1);
         else if(fabs(v.y - 0.0) < eps) return vec3(0, 0, -1);
         else return vec3(v.x, v.y, 0).normalize();
     }
-    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal) const
+    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal, vec3& color)
     {
         Ray new_ray;
         if(!(this->co == Coordinate())) new_ray = Ray(co.trans_point(ray->origin), co.trans_vector(ray->direction));
@@ -71,6 +71,7 @@ class Cylinder : public object
         if(l < 0.0) return false;
         intersection = ray->origin + l * ray->direction;
         normal = co.inv_trans_vector(this->normal(new_intersection));
+        color = this->color;
         return true;
     }
 };

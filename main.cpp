@@ -31,9 +31,11 @@ int main(int argc, char** argv)
             }
         }
     
+    printf("\nWriting Image\n");
     FILE* image = fopen("image.ppm", "w");
     fprintf(image, "P3\n%d %d\n%d\n", width, height, 255);
     for(int i = 0; i < total_pixels; i ++)
     fprintf(image, "%d %d %d ", gamma_trans(picture[i].x), gamma_trans(picture[i].y), gamma_trans(picture[i].z));
+    printf("Finished\n");
     return 0;
 }

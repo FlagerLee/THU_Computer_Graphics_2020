@@ -19,11 +19,11 @@ class Plane : public object
         type = _type;
     }
 
-    virtual vec3 normal(vec3 v) const
+    virtual vec3 normal(vec3 v)
     {
         return this->Normal;
     }
-    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal) const
+    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal, vec3& color)
     {
         Ray new_ray;
         if(!(this->co == Coordinate())) new_ray = Ray(this->co.trans_point(ray->origin), this->co.trans_vector(ray->direction));
@@ -34,6 +34,7 @@ class Plane : public object
         if(t < eps) return false;
         intersection = ray->origin + t * ray->direction;
         normal = co.inv_trans_vector(this->Normal);
+        color = this->color;
         return true;
     }
 };

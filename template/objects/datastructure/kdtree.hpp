@@ -157,16 +157,16 @@ void kdtree::find_mid(kditer Begin, kditer End, int type)
 std::vector<object*> kdtree::query(Ray ray, kdnode* node) const
 {
     std::vector<object*> obj;
-    vec3 intersect, normal;
+    vec3 intersect, normal, color;
     if(node->type == 3)
     {
-        if(node->box.intersect(&ray, intersect, normal)) obj.push_back(node->obj);
+        if(node->box.intersect(&ray, intersect, normal, color)) obj.push_back(node->obj);
     }
     else
     {
         if(node->left)
         {
-            if(node->left->box.intersect(&ray, intersect, normal))
+            if(node->left->box.intersect(&ray, intersect, normal, color))
             {
                 std::vector<object*> left_obj = query(ray, node->left);
                 if(!left_obj.empty())
@@ -178,7 +178,7 @@ std::vector<object*> kdtree::query(Ray ray, kdnode* node) const
         }
         if(node->right)
         {
-            if(node->right->box.intersect(&ray, intersect, normal))
+            if(node->right->box.intersect(&ray, intersect, normal, color))
             {
                 std::vector<object*> right_obj = query(ray, node->right);
                 if(!right_obj.empty())

@@ -19,11 +19,11 @@ class Sphere : public object
         type = _type;
     }
     
-    virtual vec3 normal(vec3 v) const
+    virtual vec3 normal(vec3 v)
     {
         return (v - this->center).normalize();
     }
-    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal) const
+    virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal, vec3& color)
     {
         Ray new_ray;
         if(!(this->co == Coordinate())) new_ray = Ray(this->co.trans_point(ray->origin), this->co.trans_vector(ray->direction));
@@ -38,6 +38,7 @@ class Sphere : public object
         else if(-B + s_delta > eps) intersection = ray->origin + (-B + s_delta) * ray->direction;
         else return false;
         normal = co.inv_trans_vector(this->normal(intersection));
+        color = this->color;
         return true;
     }
 };
