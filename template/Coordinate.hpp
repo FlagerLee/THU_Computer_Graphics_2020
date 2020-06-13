@@ -61,7 +61,7 @@ class Coordinate
     vec3 origin; //the origin point
 
     Coordinate(vec3 _x_axis, vec3 _y_axis, vec3 _z_axis, vec3 _origin):
-                x_axis(_x_axis.normalize()), y_axis(_y_axis.normalize()), z_axis(_z_axis.normalize()), origin(_origin.normalize()) {}
+                x_axis(_x_axis.normalize()), y_axis(_y_axis.normalize()), z_axis(_z_axis.normalize()), origin(_origin) {}
     Coordinate(vec3 _z_axis, vec3 _origin)
     {
         z_axis = _z_axis.normalize();

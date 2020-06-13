@@ -22,6 +22,7 @@ class Camera
     {
         x_length = 2 * tan(x_angle / 2);
         y_length = 2 * tan(y_angle / 2);
+        std::cerr << co.x_axis << " " << co.y_axis << " " << co.z_axis << std::endl;
     }
     
     Ray get_ordinary_ray(double x, double y)

@@ -50,11 +50,11 @@ Scene
             Material={DIFF}
         ]
         [
-            Shape={Rotate_Bezier; vase.bzr; 0.1}
-            Coordinate = {(0, 25, 0), (-1, 0, 0), (0, 0, 1), (0, -1, 0)}
-            Color = {(.75, .75, .75)}
-            Ratio = {1.0}
-            Material = {DIFF}
+            Shape={Mesh; waves.obj; 25}
+            Coordinate={(0, 5, 0)}
+            Color={(1, 1, 1)}
+            Ratio={1.5}
+            Material={SPEC}
         ]
     }
     End Object

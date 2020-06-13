@@ -429,10 +429,10 @@ void ppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
         }
     }
     printf("\nsize of points: %ld\nBuilding kdtree\n", points.size());
-    //for(int i = 0; i < points.size(); i ++)
+    for(int i = 0; i < points.size(); i ++)
     {
         //if(points[i]->position.x > -20 && points[i]->position.x < 20 && points[i]->position.y > 5.0 && points[i]->position.y < 15.0 && points[i]->position.z > -20 && points[i]->position.z < 20)
-        //std::cerr << points[i] << std::endl;
+        //std::cerr << points[i]->position << std::endl;
     }
     hitpoint* root = build_tree(points.begin(), points.end(), 0);
 
