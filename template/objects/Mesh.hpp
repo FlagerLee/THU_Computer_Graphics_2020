@@ -49,7 +49,7 @@ class Mesh : public object
             if((*iter)->intersect(ray, new_intersection, new_normal, new_color))
             {
                 double new_distance = (new_intersection - ray->origin).length();
-                if(new_distance < distance)
+                if(new_distance < distance && (new_intersection - ray->origin).length() > eps)
                 {
                     distance = new_distance;
                     intersection = new_intersection;

@@ -84,7 +84,6 @@ void find_mid(hpkditer Begin, hpkditer End, int dimention)
             while(j - i > 0 && cmp((*i)->position, pivot->position, dimention)) i++;
             *j = *i;
         }
-        std::cerr << i - mid << " " << j - mid << std::endl;
         *i = pivot;
         if(i - mid >= 0) hi = i - 1;
         if(mid - i >= 0) lo = i + 1;
@@ -140,12 +139,15 @@ void query(hitpoint* node, photon p)
         node->M ++;
         //BRDF: f(l, v) = C_diff / PI = surface's color
         //cos = p.in_dir * node->normal < 0
-        
         node->M_flux = node->M_flux - (p.color ^ node->color) * (p.in_dir * node->normal);
-        if(p.point.x <= -20.0 || p.point.x >= 20.0)
+        if(p.point.x > -20.0 && p.point.x < 20.0 && p.point.y > 5.0 && p.point.y < 20.0 && p.point.z > -20 && p.point.z < 20)
         {
+            //std::cerr << "p.color: " << p.color << "; node->color: " << node->color << "; p.in_dir: " << p.in_dir << "; node->normal: " << node->normal << std::endl;
+            //std::cerr << (p.color ^ node->color) * (p.in_dir * node->normal) << std::endl;
+            //std::cerr << node->M_flux << std::endl;
             //std::cerr << "Color: " << node->color << std::endl;
             //std::cerr << "Position: " << node->position << std::endl;
+            //std::cerr << "ray position: " << p.point << std::endl;
         }
         /*
         if(p.point.y == 49.99)
@@ -199,7 +201,7 @@ void query(hitpoint* node, photon p)
     }
 }
 
-const int MAX_DEPTH = 20;
+const int MAX_DEPTH = 10;
 std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double weight, vec3 _color, std::vector<object*> scene)
 {
     std::vector<hitpoint*> points;
@@ -249,9 +251,16 @@ std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double w
             else
             {
                 Ray new_refr_ray = ray.refract(ray, intersection, normal, obj->ratio);
-                std::vector<hitpoint*> new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight * R, _color ^ color, scene);
-                points.insert(points.end(), new_points.begin(), new_points.end());
-                new_points = get_hit_points(new_refr_ray, depth + 1, w, h, weight * (1 - R), _color ^ color, scene);
+                std::vector<hitpoint*> new_points = get_hit_points(new_refr_ray, depth + 1, w, h, weight * (1 - R), _color ^ color, scene);
+                if(points.size() == 0)
+                {
+                    new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight, _color ^ color, scene);
+                }
+                else
+                {
+                    points.insert(points.end(), new_points.begin(), new_points.end());
+                    new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight * R, _color ^ color, scene);
+                }
                 points.insert(points.end(), new_points.begin(), new_points.end());
             }
             break;
@@ -266,6 +275,10 @@ std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double w
         default:
             break;
         }
+    }
+    if(points.size() == 0)
+    {
+        std::cerr << "Not reaching: light origin: " << ray.origin << ", light direction: " << ray.direction << ", depth: " << depth << ", normal: " << normal << std::endl;
     }
     //assert(points.size() != 0);
     return points;
@@ -416,6 +429,11 @@ void ppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
         }
     }
     printf("\nsize of points: %ld\nBuilding kdtree\n", points.size());
+    //for(int i = 0; i < points.size(); i ++)
+    {
+        //if(points[i]->position.x > -20 && points[i]->position.x < 20 && points[i]->position.y > 5.0 && points[i]->position.y < 15.0 && points[i]->position.z > -20 && points[i]->position.z < 20)
+        //std::cerr << points[i] << std::endl;
+    }
     hitpoint* root = build_tree(points.begin(), points.end(), 0);
 
     for(int iteration = 1; iteration <= 10000; iteration ++)

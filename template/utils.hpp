@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define PI 3.14159265358979323846264338327950288
-#define eps 1e-6
+#define eps 1e-2
 #define INF 0x3f3f3f3f
 
 static const int C[10][10] = {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0},

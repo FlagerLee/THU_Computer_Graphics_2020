@@ -57,17 +57,17 @@ Scene
             Material={DIFF}
         ]
         [
-            Shape={Mesh; bunny.obj; 100}
+            Shape={Mesh; bunny.obj; 10}
             Coordinate={(5, 15, 5)}
             Color={(1, 1, 1)}
             Ratio={1.5}
-            Material={REFR}
+            Material={DIFF}
         ]
     }
     End Object
     Camera
     {
-        Coordinate={(0, 25, 50), (-1, 0, 0), (0, -1, 0), (0, 0, -1)}
+        Coordinate={(0, 50, 50), (-1, 0, 0), (0, -1, -1), (0, 1, -1)}
         x_pixel={1024}
         y_pixel={1024}
         x_angle={0.6283}

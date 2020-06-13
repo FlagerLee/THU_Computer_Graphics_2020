@@ -61,10 +61,10 @@ class Coordinate
     vec3 origin; //the origin point
 
     Coordinate(vec3 _x_axis, vec3 _y_axis, vec3 _z_axis, vec3 _origin):
-                x_axis(_x_axis), y_axis(_y_axis), z_axis(_z_axis), origin(_origin) {}
+                x_axis(_x_axis.normalize()), y_axis(_y_axis.normalize()), z_axis(_z_axis.normalize()), origin(_origin.normalize()) {}
     Coordinate(vec3 _z_axis, vec3 _origin)
     {
-        z_axis = _z_axis;
+        z_axis = _z_axis.normalize();
         x_axis = (z_axis % (fabs(z_axis.x) < 0.1 ? vec3(1, 0, 0) : vec3(0, 1, 0))).normalize();
         y_axis = z_axis % x_axis;
         origin = _origin;

@@ -188,7 +188,7 @@ class r_Bezier : public object
             {
                 if(l < eps || t < 0.0 || t > 1.0) return false;
                 intersection = ray->origin + ray->direction * l;
-                normal = co.inv_trans_vector(dt % dtheta);
+                normal = co.inv_trans_vector(dt % dtheta).normalize();
                 if(texture.loaded()) color = texture.get_color(theta / (2 * PI), t); 
                 else color = this->color;
                 return true;

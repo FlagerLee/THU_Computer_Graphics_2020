@@ -432,7 +432,6 @@ void Parser::Parse_Object(std::string s)
             if(std::regex_search(object_instance, component_sm, shape_regex))
             {
                 std::string shape_content = component_sm[1];
-                std::cerr << shape_content << std::endl;
                 Split(Erase_Blank(shape_content), parameters, ';');
                 std::string shape_type = parameters[0];
                 if(shape_type == "Sphere")
@@ -470,7 +469,6 @@ void Parser::Parse_Object(std::string s)
                         std::string scale = parameters[2];
                         Mesh* new_object = new Mesh(atof(scale.c_str()), Color, vec3(), ratio, co, material);
                         Loadobj(new_object, mesh_path);
-                        std::cerr << new_object->T.size();
                         objs->Objects.push_back(new_object);
                         objs->obj_size ++;
                     }
@@ -593,13 +591,15 @@ std::vector<vec3> Parser::Parse_Controll_Point(std::string Path) //s is bezier f
         return controll_points;
     }
     std::regex point_regex("\\(([0-9\\.,]+?)\\)");
-    std::smatch sm;
-    if(std::regex_match(points_str, sm, point_regex))
+    auto head = std::sregex_iterator(points_str.begin(), points_str.end(), point_regex);
+    auto tail = std::sregex_iterator();
+    if(std::distance(head, tail))
     {
-        for(sm_iter head = sm.begin(); head != sm.end(); head ++)
+        for(auto iter = head; iter != tail; iter ++)
         {
             std::vector<std::string> position;
-            Split(*head, position, ',');
+            std::string point = (*iter).str();
+            Split(std::string(point.begin() + 1, point.end() - 1), position, ',');
             controll_points.push_back(vec3(atof(position[0].c_str()), atof(position[1].c_str())));
         }
     }
