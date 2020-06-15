@@ -242,6 +242,7 @@ std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double w
         case REFR:
         {
             double R = ray.fersnel(ray, intersection, normal, obj->ratio);
+            std::cerr << "H: " << h << "; W: " << w << "; R: " << R << std::endl;
             Ray new_refl_ray = ray.reflect(ray, intersection, normal);
             if(1.0 - R < eps)
             {
@@ -252,15 +253,8 @@ std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double w
             {
                 Ray new_refr_ray = ray.refract(ray, intersection, normal, obj->ratio);
                 std::vector<hitpoint*> new_points = get_hit_points(new_refr_ray, depth + 1, w, h, weight * (1 - R), _color ^ color, scene);
-                if(points.size() == 0)
-                {
-                    new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight, _color ^ color, scene);
-                }
-                else
-                {
-                    points.insert(points.end(), new_points.begin(), new_points.end());
-                    new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight * R, _color ^ color, scene);
-                }
+                points.insert(points.end(), new_points.begin(), new_points.end());
+                new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight * R, _color ^ color, scene);
                 points.insert(points.end(), new_points.begin(), new_points.end());
             }
             break;
@@ -278,13 +272,13 @@ std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double w
     }
     if(points.size() == 0)
     {
-        std::cerr << "Not reaching: light origin: " << ray.origin << ", light direction: " << ray.direction << ", depth: " << depth << ", normal: " << normal << std::endl;
+        //std::cerr << "Not reaching: light origin: " << ray.origin << ", light direction: " << ray.direction << ", depth: " << depth << ", normal: " << normal << std::endl;
     }
     //assert(points.size() != 0);
     return points;
 }
 
-void trace_photons(Ray ray, int depth, vec3 _color, hitpoint* root, std::vector<object*> scene)
+void trace_photons(Ray ray, int depth, vec3 _color, hitpoint* root, std::vector<object*> scene, bool first_diff)
 {
     if(depth > MAX_DEPTH) return; //need to be changed to Russian Rollute
     int scene_size = scene.size();
@@ -316,29 +310,37 @@ void trace_photons(Ray ray, int depth, vec3 _color, hitpoint* root, std::vector<
         case SPEC:
         {
             Ray new_ray = ray.reflect(ray, intersection, normal);
-            trace_photons(new_ray, depth + 1, _color ^ color, root, scene);
+            trace_photons(new_ray, depth + 1, _color ^ color, root, scene, first_diff);
             break;
         }
         case REFR:
         {
             double R = ray.fersnel(ray, intersection, normal, obj->ratio);
             Ray new_refl_ray = ray.reflect(ray, intersection, normal);
-            if(1.0 - R < eps) trace_photons(new_refl_ray, depth + 1, _color ^ color, root, scene);
+            if(1.0 - R < eps) trace_photons(new_refl_ray, depth + 1, _color ^ color, root, scene, first_diff);
             else
             {
                 Ray new_refr_ray = ray.refract(ray, intersection, normal, obj->ratio);
-                trace_photons(new_refl_ray, depth + 1, R * _color ^ color, root, scene);
-                trace_photons(new_refr_ray, depth + 1, (1 - R) * _color ^ color, root, scene);
+                trace_photons(new_refl_ray, depth + 1, R * _color ^ color, root, scene, first_diff);
+                trace_photons(new_refr_ray, depth + 1, (1 - R) * _color ^ color, root, scene, first_diff);
             }
             break;
         }
         case DIFF:
         {
             //printf("intersection: %.5lf %.5lf %.5lf\n", intersection.x, intersection.y, intersection.z);
-            photon p(intersection, ray.direction, _color);
-            query(root, p);
-            Ray new_ray = ray.diffuse(ray, intersection, normal);
-            trace_photons(new_ray, depth + 1, _color ^ color, root, scene);
+            if(!first_diff)
+            {
+                Ray new_ray = ray.diffuse(ray, intersection, normal);
+                trace_photons(new_ray, depth + 1, _color ^ color, root, scene, true);
+            }
+            else
+            {
+                photon p(intersection, ray.direction, _color);
+                query(root, p);
+                Ray new_ray = ray.diffuse(ray, intersection, normal);
+                trace_photons(new_ray, depth + 1, _color ^ color, root, scene, true);
+            }
         }
         default:
             break;
@@ -451,7 +453,7 @@ void ppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
                 //printf("%d\n", hits);
                 photon p(emit.origin, scene[id]->co.inv_trans_vector(scene[id]->normal(vec3())) * (-1), scene[id]->emission * 10);
                 query(root, p);
-                trace_photons(emit, 1, scene[id]->emission, root, scene);
+                trace_photons(emit, 1, scene[id]->emission, root, scene, false);
             }
         }
         

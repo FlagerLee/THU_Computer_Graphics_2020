@@ -11,6 +11,8 @@ enum Camera_type{Ordinary, Fish};
 
 class Camera
 {
+    private:
+    double radius; //DOF 
     public:
     const Coordinate co; //in this coordinate system, camera faces (0, 0, 1)
     const double x_angle, y_angle; //field angle
