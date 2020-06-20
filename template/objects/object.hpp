@@ -17,16 +17,6 @@ class Texture
     unsigned int load_texture(const char* filename);
     vec3 get_color(double w, double h); //w = (column id)/(number of columns), the same as h
     bool loaded() {return texture.size() != 0;}
-    void test()
-    {
-        FILE* f = fopen("test.ppm", "w");
-        fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-        for(int i = 0; i < width * height; i ++)
-        {
-            fprintf(f, "%d %d %d ", texture[i * 4], texture[i * 4 + 1], texture[i * 4 + 2]);
-            fflush(f);
-        }
-    }
 };
 
 class object
@@ -40,7 +30,7 @@ class object
     Texture texture; //texture map
     virtual bool intersect(const Ray* ray, vec3& intersection, vec3& normal, vec3& color) = 0;
     virtual vec3 normal(vec3 v) = 0; //get normal vector
-    virtual Ray random_emit() //ppm
+    virtual Ray random_emit(vec3& Color, vec3& Normal) //ppm
     {
         fprintf(stderr, "Do not exist overloaded function \"random_emit()\"\n");
         return Ray();
@@ -65,6 +55,8 @@ vec3 Texture::get_color(double w, double h)
     else if(w > 1.0) w = 1.0;
     if(h < 0.0) h = 0.0;
     else if(h > 1.0) h = 1.0;
+    w = 1.0 - w;
+    h = 1.0 - h;
     int r = h * height, c = w * width;
     int pos = r * width + c;
     vec3 color;

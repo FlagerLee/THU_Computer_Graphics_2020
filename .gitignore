@@ -42,3 +42,9 @@
 mesh_00069.obj
 *.dSYM/
 
+*.aux
+*.log
+*.pdf
+*.tex
+*.gz
+*.toc

@@ -39,9 +39,11 @@ class Circle : public object
         else return false;
     }
 
-    virtual Ray random_emit()
+    virtual Ray random_emit(vec3& Color, vec3& Normal)
     {
         //first find out the origin of the emitted ray
+        Color = vec3(1, 1, 1);
+        Normal = co.inv_trans_vector(normal(vec3()));
         double r = radius * frand();
         double theta = frand() * 2 * PI;
         vec3 origin = co.inv_trans_point(vec3(r * cos(theta), r * sin(theta)));

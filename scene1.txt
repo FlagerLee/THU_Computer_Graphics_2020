@@ -1,0 +1,63 @@
+Scene
+{
+    Light
+    {
+        [
+            Shape={Circle; 10.0}
+            Coordinate={(0, 99.99, 0), (1, 0, 0), (0, 0, 1), (0, -1, 0)}
+            Color={(1, 1, 1)}
+            Illumination={(2, 2, 2)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+    }
+    End Light
+    Object
+    {
+        [
+            Shape={Square; 100.0; 100.0}
+            Color={(.75, .25, .25)}
+            Coordinate={(-50, 0, 50), (1, 0, 0), (0, 0, -1), (0, 1, 0)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Square; 100.0; 100.0}
+            Color={(.25, .75, .25)}
+            Coordinate={(-50, 0, -50), (1, 0, 0), (0, 1, 0), (0, 0, 1)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Square; 100.0; 100.0}
+            Color={(.25, .25, .75)}
+            Coordinate={(50, 0, -50), (0, 0, 1), (0, 1, 0), (-1, 0, 0)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Square; 100.0; 100.0}
+            Color={(1, 1, 1)}
+            Coordinate={(-50, 0, 50), (0, 0, -1), (0, 1, 0), (1, 0, 0)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Square; 100.0; 100.0}
+            Color={(1, 1, 1)}
+            Coordinate={(-50, 100, 50), (0, 0, -1), (1, 0, 0), (0, -1, 0)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+    }
+    End Object
+    Camera
+    {
+        Coordinate={(0, 50, 50), (-1, 0, 0), (0, -1, 0), (0, 0, -1)}
+        x_pixel={1024}
+        y_pixel={1024}
+        x_angle={1.5708}
+        y_angle={1.5708}
+    }
+    End Camera
+}

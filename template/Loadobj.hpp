@@ -48,14 +48,14 @@ void Loadobj(Mesh* M, std::string Path)
         else if(first == "vt") //texture coordinate
         {
             vec3 vertex_t;
-            linestream >> vertex_t.x >> vertex_t.y >> vertex_t.z;
+            linestream >> vertex_t.x >> vertex_t.y;
             vt.push_back(vertex_t);
         }
         else if(first == "f") //face; need to consider four or more points in a face
         {
             std::string X, Y, Z;
             linestream >> X >> Y >> Z;
-            vec3 vertex[3], vertex_n[3];
+            vec3 vertex[3], vertex_n[3], vertex_t[3];
             int ID = 0;
             int count = 0;
             for(auto iter = X.begin(); iter != X.end(); iter ++)
@@ -65,13 +65,17 @@ void Loadobj(Mesh* M, std::string Path)
                 {
                     if(count == 0)
                     {
-                        vertex[0] = M->co.inv_trans_point(v[ID - 1] * M->scale);
+                        if(ID) vertex[0] = M->co.inv_trans_point(v[ID - 1] * M->scale);
+                    }
+                    else if(count == 1)
+                    {
+                        if(ID) vertex_t[0] = M->co.inv_trans_point(vt[ID - 1] * M->scale);
                     }
                     ID = 0;
                     count ++;
                 }
             }
-            vertex_n[0] = M->co.inv_trans_vector(vn[ID - 1].normalize());
+            if(ID) vertex_n[0] = M->co.inv_trans_vector(vn[ID - 1].normalize());
             ID = 0;
             count = 0;
             for(auto iter = Y.begin(); iter != Y.end(); iter ++)
@@ -81,13 +85,17 @@ void Loadobj(Mesh* M, std::string Path)
                 {
                     if(count == 0)
                     {
-                        vertex[1] = M->co.inv_trans_point(v[ID - 1] * M->scale);
+                        if(ID) vertex[1] = M->co.inv_trans_point(v[ID - 1] * M->scale);
+                    }
+                    else if(count == 1)
+                    {
+                        if(ID) vertex_t[1] = M->co.inv_trans_point(vt[ID - 1] * M->scale);
                     }
                     count ++;
                     ID = 0;
                 }
             }
-            vertex_n[1] = M->co.inv_trans_vector(vn[ID - 1].normalize());
+            if(ID) vertex_n[1] = M->co.inv_trans_vector(vn[ID - 1].normalize());
             count = 0;
             ID = 0;
             for(auto iter = Z.begin(); iter != Z.end(); iter ++)
@@ -97,16 +105,21 @@ void Loadobj(Mesh* M, std::string Path)
                 {
                     if(count == 0)
                     {
-                        vertex[2] = M->co.inv_trans_point(v[ID - 1] * M->scale);
+                        if(ID)vertex[2] = M->co.inv_trans_point(v[ID - 1] * M->scale);
+                    }
+                    else if(count == 1)
+                    {
+                        if(ID)vertex_t[2] = M->co.inv_trans_point(vt[ID - 1] * M->scale);
                     }
                     count ++;
                     ID = 0;
                 }
             }
-            vertex_n[2] = M->co.inv_trans_vector(vn[ID - 1].normalize());
-            assert(vertex_n[0] != vec3() || vertex_n[1] != vec3() || vertex_n[2] != vec3());
+            if(ID) vertex_n[2] = M->co.inv_trans_vector(vn[ID - 1].normalize());
             Triangle* Tri;
             if(isnan(vertex_n[0].x) || isnan(vertex_n[1].x) || isnan(vertex_n[2].x))
+            Tri = new Triangle(vertex, M->color, M->emission, M->ratio, M->type);
+            else if(vertex_n[0] == vec3() || vertex_n[1] == vec3() || vertex_n[2] == vec3())
             Tri = new Triangle(vertex, M->color, M->emission, M->ratio, M->type);
             else Tri = new Triangle(vertex, vertex_n, M->color, M->emission, M->ratio, M->type);
             M->T.push_back(Tri);

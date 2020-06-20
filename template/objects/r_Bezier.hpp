@@ -194,8 +194,8 @@ class r_Bezier : public object
                 return true;
             }
             double D = new_ray.direction * (dt % dtheta);
-            double D0 = dtheta * (dt % new_ray.direction);
-            l = l - (dtheta * (dt % f) / D0);
+            //double D0 = dtheta * (dt % new_ray.direction);
+            l = l + (dtheta * (dt % f) / D);
             t = t - (new_ray.direction * (dtheta % f) / D);
             theta = theta + (new_ray.direction * (dt % f) / D);
             if(theta < 0.0) theta = PI - theta;

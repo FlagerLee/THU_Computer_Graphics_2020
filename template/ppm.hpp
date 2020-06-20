@@ -3,6 +3,10 @@
 #include "Camera.hpp"
 #include <vector>
 #include <algorithm>
+#include <random>
+#include <time.h>
+
+using std::default_random_engine;
 
 class hitpoint
 {
@@ -43,7 +47,7 @@ class hitpoint
     int dimention; //0: compare x; 1: compare y; 2: compare z
 };
 
-double hitpoint::radius = 1.0;
+double hitpoint::radius = 2.0;
 double hitpoint::decrease = 0.0;
 
 bool cmp(hitpoint* a, hitpoint* b, int dimention)
@@ -201,7 +205,7 @@ void query(hitpoint* node, photon p)
     }
 }
 
-const int MAX_DEPTH = 10;
+const int MAX_DEPTH = 5;
 std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double weight, vec3 _color, std::vector<object*> scene)
 {
     std::vector<hitpoint*> points;
@@ -242,7 +246,6 @@ std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double w
         case REFR:
         {
             double R = ray.fersnel(ray, intersection, normal, obj->ratio);
-            std::cerr << "H: " << h << "; W: " << w << "; R: " << R << std::endl;
             Ray new_refl_ray = ray.reflect(ray, intersection, normal);
             if(1.0 - R < eps)
             {
@@ -278,7 +281,7 @@ std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double w
     return points;
 }
 
-void trace_photons(Ray ray, int depth, vec3 _color, hitpoint* root, std::vector<object*> scene, bool first_diff)
+void trace_photons(Ray ray, int depth, vec3 _color, hitpoint* root, std::vector<object*> scene, int first_diff)
 {
     if(depth > MAX_DEPTH) return; //need to be changed to Russian Rollute
     int scene_size = scene.size();
@@ -329,17 +332,19 @@ void trace_photons(Ray ray, int depth, vec3 _color, hitpoint* root, std::vector<
         case DIFF:
         {
             //printf("intersection: %.5lf %.5lf %.5lf\n", intersection.x, intersection.y, intersection.z);
-            if(!first_diff)
+            if(first_diff < 2)
             {
+                photon p(intersection, ray.direction, _color);
+                query(root, p);
                 Ray new_ray = ray.diffuse(ray, intersection, normal);
-                trace_photons(new_ray, depth + 1, _color ^ color, root, scene, true);
+                trace_photons(new_ray, depth + 1, _color ^ color * 0.2, root, scene, first_diff + 1);
             }
             else
             {
                 photon p(intersection, ray.direction, _color);
                 query(root, p);
-                Ray new_ray = ray.diffuse(ray, intersection, normal);
-                trace_photons(new_ray, depth + 1, _color ^ color, root, scene, true);
+                //Ray new_ray = ray.diffuse(ray, intersection, normal);
+                //trace_photons(new_ray, depth + 1, _color ^ color, root, scene, true);
             }
         }
         default:
@@ -405,7 +410,7 @@ void update_picture(hitpoint* node, vec3* picture, int width)
 void correct(hitpoint* root, vec3* picture, int width)
 {
     hitpoint::decrease = 0.0;
-    std::cerr << "start update decrease\n";
+    std::cerr << "\nstart update decrease\n";
     update_decrease(root);
     std::cerr << "decrese: " << hitpoint::decrease << std::endl;
     hitpoint::radius *= sqrt(hitpoint::decrease);
@@ -414,6 +419,7 @@ void correct(hitpoint* root, vec3* picture, int width)
 
 void ppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
 {
+    default_random_engine e(time(NULL));
     std::vector<hitpoint*> points;
     int scene_size = scene.size();
     int width = cam.x_pixel;
@@ -424,10 +430,42 @@ void ppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
         printf("\rtracing hit points %.2lf%%", (double)(h + 1) * 100.0 / (double)height);
         for(int w = 0; w < width; w ++)
         {
+            for(int i = 0; i < 4; i ++)
+            {
+                //for(int j = 0; j < 5; j ++)
+                {
+                    Ray ray;
+                    double rand1 = double(e()) / double(e.max()) / 2;
+                    double rand2 = double(e()) / double(e.max()) / 2;
+                    switch (i)
+                    {
+                    case 0:
+                        ray = cam.get_ordinary_ray(w + rand1, h + rand2);
+                        break;
+                    case 1:
+                        ray = cam.get_ordinary_ray(w + rand1 + .5, h + rand2);
+                        break;
+                    case 2:
+                        ray = cam.get_ordinary_ray(w + rand1, h + rand2 + .5);
+                        break;
+                    case 3:
+                        ray = cam.get_ordinary_ray(w + rand1 + .5, h + rand2 + .5);
+                        break;
+                    }
+                    std::vector<hitpoint*> new_points = get_hit_points(ray, 1, w, h, 1.0, vec3(1.0, 1.0, 1.0), scene);
+                    points.insert(points.end(), new_points.begin(), new_points.end());
+                }
+            }
+            if(w == 512 && h == 512)
+            {
+                int debug = 1;
+            }
+            /*
             Ray ray = cam.get_ordinary_ray(w, h);
             std::vector<hitpoint*> new_points = get_hit_points(ray, 1, w, h, 1.0, vec3(1.0, 1.0, 1.0), scene);
             if(new_points.size() == 0) printf("Error!: w: %d, h: %d\n", w, h);
             points.insert(points.end(), new_points.begin(), new_points.end());
+            */
         }
     }
     printf("\nsize of points: %ld\nBuilding kdtree\n", points.size());
@@ -449,26 +487,26 @@ void ppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
             {
                 n ++;
                 if(n % 10 == 0) printf("\rEmitting photons %5.2lf%%", (double)n * 100.0 / (double)MAX_PHOTONS);
-                Ray emit = scene[id]->random_emit();
+                vec3 Color, normal;
+                Ray emit = scene[id]->random_emit(Color, normal);
                 //printf("%d\n", hits);
-                photon p(emit.origin, scene[id]->co.inv_trans_vector(scene[id]->normal(vec3())) * (-1), scene[id]->emission * 10);
+                photon p(emit.origin, -normal, Color ^ scene[id]->emission * 10);
                 query(root, p);
-                trace_photons(emit, 1, scene[id]->emission, root, scene, false);
+                trace_photons(emit, 1, scene[id]->emission, root, scene, 0);
             }
         }
         
         vec3* picture = new vec3[size];
-        std::cerr << "start drawing\n";
         //correct(points.begin(), points.end(), picture, width);
         correct(root, picture, width);
-        printf("\nradius: %lf\n", hitpoint::radius);
+        printf("radius: %lf\n", hitpoint::radius);
         printf("Writing Image\n");
         FILE* image = fopen("iteration.ppm", "w");
         fprintf(image, "P3\n%d %d\n%d\n", width, height, 255);
         for(int i = 0; i < size; i ++)
-        fprintf(image, "%d %d %d ", gamma_trans(picture[i].x), gamma_trans(picture[i].y), gamma_trans(picture[i].z));
+        fprintf(image, "%d %d %d ", gamma_trans(picture[i].x / 4.0), gamma_trans(picture[i].y / 4.0), gamma_trans(picture[i].z / 4.0));
         fflush(image);
-        printf("Finished\n");
+        printf("Finished\n\n");
         delete[] picture;
     }
 }

@@ -57,10 +57,12 @@
 #include "objects/Plane.hpp"
 #include "objects/Circle.hpp"
 #include "objects/Sphere.hpp"
+#include "objects/Square.hpp"
 #include "objects/Cylinder.hpp"
 #include "objects/r_Bezier.hpp"
 #include "objects/Triangle.hpp"
 #include "objects/Mesh.hpp"
+#include "objects/Box.hpp"
 #include "Camera.hpp"
 #include "Loadobj.hpp"
 
@@ -256,6 +258,7 @@ void Parser::Parse_Light(std::string s)
             std::regex illumination_regex("Illumination\\s*?=\\s*?\\{(.+?)\\}");
             std::regex ratio_regex("Ratio\\s*?=\\s*?\\{(.+?)\\}");
             std::regex material_regex("Material\\s*?=\\s*?\\{(.+?)\\}");
+            std::regex texture_regex("Texture\\s*?=\\s*?\\{(.+?)\\}");
             std::smatch component_sm;
             std::vector<std::string> parameters;
             color Color;
@@ -263,6 +266,11 @@ void Parser::Parse_Light(std::string s)
             vec3 illumination;
             double ratio;
             Refl_t material;
+            std::string texture_content = "";
+            if(std::regex_search(light_instance, component_sm, texture_regex))
+            {
+                texture_content = component_sm[1];
+            }
             if(std::regex_search(light_instance, component_sm, color_regex))
             {
                 std::string color_content = component_sm[1];
@@ -352,9 +360,32 @@ void Parser::Parse_Light(std::string s)
                         std::cerr << e.what() << '\n';
                     }
                 }
-                else
+                else if(shape_type == "Box")
                 {
-                    std::cerr << "Unsupported Object Type in Light" << shape_type << "\n";
+                    try
+                    {
+                        std::string length = parameters[1];
+                        std::string width = parameters[2];
+                        std::string height = parameters[3];
+                        std::string texture[6];
+                        if(texture_content != "")
+                        {
+                            std::vector<std::string> textures;
+                            Split(texture_content, textures, ';');
+                            if(textures.size() >= 6)
+                            {
+                                for(int k = 0; k < 6; k ++) texture[k] = textures[k];
+                            }
+                        }
+                        Box* new_light = new Box(vec3(atof(length.c_str()), atof(width.c_str()), atof(height.c_str())), texture, Color, illumination, ratio, co, material);
+                        light->Objects.push_back(new_light);
+                        light->obj_size ++;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        std::cerr << e.what() << '\n';
+                    }
+                    
                 }
             }
         }
@@ -380,12 +411,18 @@ void Parser::Parse_Object(std::string s)
             std::regex coordinate_regex("Coordinate\\s*?=\\s*?\\{(.+?)\\}");
             std::regex ratio_regex("Ratio\\s*?=\\s*?\\{(.+?)\\}");
             std::regex material_regex("Material\\s*?=\\s*?\\{(.+?)\\}");
+            std::regex texture_regex("Texture\\s*?=\\s*?\\{(.+?)\\}");
             std::smatch component_sm;
             std::vector<std::string> parameters;
             color Color;
             Coordinate co;
             double ratio;
             Refl_t material;
+            std::string texture_content = "";
+            if(std::regex_search(object_instance, component_sm, texture_regex))
+            {
+                texture_content = component_sm[1];
+            }
             if(std::regex_search(object_instance, component_sm, color_regex))
             {
                 std::string color_content = component_sm[1];
@@ -440,6 +477,7 @@ void Parser::Parse_Object(std::string s)
                     {
                         std::string radius = parameters[2];
                         Sphere* new_object = new Sphere(Parse_Vec3(parameters[1]), atof(radius.c_str()), Color, vec3(), ratio, co, material);
+                        if(texture_content != "") new_object->texture.load_texture(texture_content.c_str());
                         objs->Objects.push_back(new_object);
                         objs->obj_size ++;
                     }
@@ -447,6 +485,42 @@ void Parser::Parse_Object(std::string s)
                     {
                         std::cerr << e.what() << '\n';
                     }
+                }
+                else if(shape_type == "Triangle")
+                {
+                    try
+                    {
+                        std::string point1 = parameters[1];
+                        std::string point2 = parameters[2];
+                        std::string point3 = parameters[3];
+                        vec3 points[3] = {Parse_Vec3(point1), Parse_Vec3(point2), Parse_Vec3(point3)};
+                        Triangle* new_object = new Triangle(points, Color, vec3(), ratio, material);
+                        if(texture_content != "") new_object->texture.load_texture(texture_content.c_str());
+                        objs->Objects.push_back(new_object);
+                        objs->obj_size ++;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        std::cerr << e.what() << '\n';
+                    }
+                    
+                }
+                else if(shape_type == "Square")
+                {
+                    try
+                    {
+                        std::string width = parameters[1];
+                        std::string height = parameters[2];
+                        Square* new_object = new Square(atof(width.c_str()), atof(height.c_str()), Color, vec3(), ratio, co, material);
+                        if(texture_content != "") new_object->texture.load_texture(texture_content.c_str());
+                        objs->Objects.push_back(new_object);
+                        objs->obj_size ++;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        std::cerr << e.what() << '\n';
+                    }
+                    
                 }
                 else if(shape_type == "Plane")
                 {
@@ -468,6 +542,7 @@ void Parser::Parse_Object(std::string s)
                         std::string mesh_path = parameters[1];
                         std::string scale = parameters[2];
                         Mesh* new_object = new Mesh(atof(scale.c_str()), Color, vec3(), ratio, co, material);
+                        if(texture_content != "") new_object->texture.load_texture(texture_content.c_str());
                         Loadobj(new_object, mesh_path);
                         objs->Objects.push_back(new_object);
                         objs->obj_size ++;
@@ -483,6 +558,7 @@ void Parser::Parse_Object(std::string s)
                     {
                         std::string controll_point_path = parameters[1];
                         r_Bezier* new_object = new r_Bezier(Parse_Controll_Point(controll_point_path), Color, vec3(), ratio, co, material);
+                        if(texture_content != "") new_object->texture.load_texture(texture_content.c_str());
                         objs->Objects.push_back(new_object);
                         objs->obj_size ++;
                     }
@@ -490,6 +566,33 @@ void Parser::Parse_Object(std::string s)
                     {
                         std::cerr << e.what() << '\n';
                     }
+                }
+                else if(shape_type == "Box")
+                {
+                    try
+                    {
+                        std::string length = parameters[1];
+                        std::string width = parameters[2];
+                        std::string height = parameters[3];
+                        std::string texture[6];
+                        if(texture_content != "")
+                        {
+                            std::vector<std::string> textures;
+                            Split(texture_content, textures, ';');
+                            if(textures.size() >= 6)
+                            {
+                                for(int k = 0; k < 6; k ++) texture[k] = textures[k];
+                            }
+                        }
+                        Box* new_object = new Box(vec3(atof(length.c_str()), atof(width.c_str()), atof(height.c_str())), texture, Color, vec3(), ratio, co, material);
+                        objs->Objects.push_back(new_object);
+                        objs->obj_size ++;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        std::cerr << e.what() << '\n';
+                    }
+                    
                 }
                 else
                 {
@@ -512,9 +615,11 @@ void Parser::Parse_Camera(std::string camera_content)
     std::regex y_angle_regex("y_angle\\s*?=\\s*?\\{(.+?)\\}");
     std::regex x_pixel_regex("x_pixel\\s*?=\\s*?\\{(.+?)\\}");
     std::regex y_pixel_regex("y_pixel\\s*?=\\s*?\\{(.+?)\\}");
+    std::regex radius_regex("apreture\\s*?=\\s*?\\{(.+?)\\}");
+    std::regex f_regex("f\\s*?=\\s*?\\{(.+?)\\}");
     std::smatch sm;
     Coordinate co;
-    double x_angle, y_angle;
+    double x_angle, y_angle, radius, f;
     int x_pixel, y_pixel;
     if(std::regex_search(camera_content, sm, coordinate_regex))
     {
@@ -560,7 +665,26 @@ void Parser::Parse_Camera(std::string camera_content)
     {
         std::cerr << "Cannot Find Camera Y Pixel\n";
     }
-    cam = new Camera(co, x_angle, y_angle, x_pixel, y_pixel);
+    if(std::regex_search(camera_content, sm, radius_regex))
+    {
+        std::string radius_content = sm[1];
+        radius = atof(radius_content.c_str());
+    }
+    else
+    {
+        std::cerr << "Cannot Find Apreture\n";
+    }
+    if(std::regex_search(camera_content, sm, f_regex))
+    {
+        std::string f_content = sm[1];
+        f = atof(f_content.c_str());
+    }
+    else
+    {
+        std::cerr << "Cannot Find Focal Length\n";
+        f = 0.5;
+    }
+    cam = new Camera(co, x_angle, y_angle, x_pixel, y_pixel, radius, f);
 }
 
 void Parser::Parse_Algorithm(std::string s)

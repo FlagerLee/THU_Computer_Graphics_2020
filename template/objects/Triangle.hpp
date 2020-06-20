@@ -7,6 +7,7 @@
 class Triangle : public object
 {
     public:
+    vec3 Ng;
     //in coordinate system co, z_axis is its normal, and x_axis is u, y_axis is v
     double u_length, v_length; //represents when u = 1 and v = 1, the value of x and y
     vec3 v_normal[3]; //vertex normal
@@ -16,6 +17,7 @@ class Triangle : public object
         co.origin = point[1];
         co.x_axis = (point[0] - point[1]).normalize();
         co.y_axis = (point[2] - point[1]).normalize();
+        Ng = (co.x_axis % co.y_axis).normalize();
         vec3 delta1 = point[0] - point[1];
         if(fabs(co.x_axis.x - 0.0) > eps && fabs(delta1.x - 0.0) > eps) u_length = delta1.x / co.x_axis.x;
         else if(fabs(co.x_axis.y - 0.0) > eps && fabs(delta1.y - 0.0) > eps) u_length = delta1.y / co.x_axis.y;
@@ -45,6 +47,7 @@ class Triangle : public object
         co.origin = point[1];
         co.x_axis = (point[0] - point[1]).normalize();
         co.y_axis = (point[2] - point[1]).normalize();
+        Ng = (co.x_axis % co.y_axis).normalize();
         vec3 delta1 = point[0] - point[1];
         if(fabs(co.x_axis.x - 0.0) > eps && fabs(delta1.x - 0.0) > eps) u_length = delta1.x / co.x_axis.x;
         else if(fabs(co.x_axis.y - 0.0) > eps && fabs(delta1.y - 0.0) > eps) u_length = delta1.y / co.x_axis.y;
@@ -61,7 +64,7 @@ class Triangle : public object
         ratio = _ratio;
         type = _type;
     }
-
+    vec3 normal_g(){return Ng;}
     virtual vec3 normal(vec3 v)
     {
         if(is_inv) return v.x * v_normal[2] + v.y * v_normal[0] + (1 - v.x - v.y) * v_normal[1];
@@ -77,8 +80,8 @@ class Triangle : public object
         vec3 point = new_ray.origin + t * new_ray.direction;
         double u = point.x / u_length, v = point.y / v_length;
         if(u + v > 1.0 || u < 0.0 || v < 0.0) return false;
-        normal = this->normal(vec3(u, v));
         intersection = ray->origin + t * ray->direction;
+        normal = this->normal(vec3(u, v));
         color = this->color;
         //printf("intersection: %.5lf %.5lf %.5lf\nnormal: %.5f %.5f %.5f\n", intersection.x, intersection.y, intersection.z, normal.x, normal.y, normal.z);
         return true;

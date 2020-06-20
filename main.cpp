@@ -14,8 +14,6 @@ int main(int argc, char** argv)
     std::vector<object*> objects = light_obj->Objects;
     objects.insert(objects.end(), obj->Objects.begin(), obj->Objects.end());
 
-    for(auto iter = objects.begin(); iter != objects.end(); iter ++)
-
     ppm(*cam, 100000, objects);
     /*
     srand(time(NULL));
