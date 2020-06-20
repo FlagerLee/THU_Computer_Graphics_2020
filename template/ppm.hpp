@@ -8,6 +8,8 @@
 
 using std::default_random_engine;
 
+default_random_engine ee;
+
 class hitpoint
 {
     public:
@@ -141,6 +143,10 @@ void query(hitpoint* node, photon p)
     if((p.point - node->position).length() < node->radius)
     {
         node->M ++;
+        if(node->h == 600 && node->w == 560)
+        {
+            //std::cerr << node->M_flux << std::endl;
+        }
         //BRDF: f(l, v) = C_diff / PI = surface's color
         //cos = p.in_dir * node->normal < 0
         node->M_flux = node->M_flux - (p.color ^ node->color) * (p.in_dir * node->normal);
@@ -247,19 +253,19 @@ std::vector<hitpoint*> get_hit_points(Ray ray, int depth, int w, int h, double w
         {
             double R = ray.fersnel(ray, intersection, normal, obj->ratio);
             Ray new_refl_ray = ray.reflect(ray, intersection, normal);
-            if(1.0 - R < eps)
+            double rand = double(ee()) / double(ee.max());
+            if(rand > R) //refract;
             {
-                std::vector<hitpoint*> new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight, _color ^ color, scene);
+                Ray new_refr_ray = ray.refract(ray, intersection, normal, obj->ratio);
+                std::vector<hitpoint*> new_points = get_hit_points(new_refr_ray, depth + 1, w, h, weight, _color ^ color, scene);
                 points.insert(points.end(), new_points.begin(), new_points.end());
             }
             else
             {
-                Ray new_refr_ray = ray.refract(ray, intersection, normal, obj->ratio);
-                std::vector<hitpoint*> new_points = get_hit_points(new_refr_ray, depth + 1, w, h, weight * (1 - R), _color ^ color, scene);
-                points.insert(points.end(), new_points.begin(), new_points.end());
-                new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight * R, _color ^ color, scene);
+                std::vector<hitpoint*> new_points = get_hit_points(new_refl_ray, depth + 1, w, h, weight, _color ^ color, scene);
                 points.insert(points.end(), new_points.begin(), new_points.end());
             }
+            
             break;
         }
         case DIFF:
@@ -319,13 +325,13 @@ void trace_photons(Ray ray, int depth, vec3 _color, hitpoint* root, std::vector<
         case REFR:
         {
             double R = ray.fersnel(ray, intersection, normal, obj->ratio);
+            double rand = double(ee()) / double(ee.max());
             Ray new_refl_ray = ray.reflect(ray, intersection, normal);
-            if(1.0 - R < eps) trace_photons(new_refl_ray, depth + 1, _color ^ color, root, scene, first_diff);
+            if(rand < R) trace_photons(new_refl_ray, depth + 1, _color ^ color, root, scene, first_diff);
             else
             {
                 Ray new_refr_ray = ray.refract(ray, intersection, normal, obj->ratio);
-                trace_photons(new_refl_ray, depth + 1, R * _color ^ color, root, scene, first_diff);
-                trace_photons(new_refr_ray, depth + 1, (1 - R) * _color ^ color, root, scene, first_diff);
+                trace_photons(new_refr_ray, depth + 1, _color ^ color, root, scene, first_diff);
             }
             break;
         }
@@ -337,7 +343,7 @@ void trace_photons(Ray ray, int depth, vec3 _color, hitpoint* root, std::vector<
                 photon p(intersection, ray.direction, _color);
                 query(root, p);
                 Ray new_ray = ray.diffuse(ray, intersection, normal);
-                trace_photons(new_ray, depth + 1, _color ^ color * 0.2, root, scene, first_diff + 1);
+                trace_photons(new_ray, depth + 1, _color ^ color * 0.5, root, scene, first_diff + 1);
             }
             else
             {
@@ -420,6 +426,7 @@ void correct(hitpoint* root, vec3* picture, int width)
 void ppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
 {
     default_random_engine e(time(NULL));
+    ee.seed(time(NULL) + 123);
     std::vector<hitpoint*> points;
     int scene_size = scene.size();
     int width = cam.x_pixel;
@@ -490,9 +497,9 @@ void ppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
                 vec3 Color, normal;
                 Ray emit = scene[id]->random_emit(Color, normal);
                 //printf("%d\n", hits);
-                photon p(emit.origin, -normal, Color ^ scene[id]->emission * 10);
+                photon p(emit.origin, -normal, Color ^ scene[id]->emission);
                 query(root, p);
-                trace_photons(emit, 1, scene[id]->emission, root, scene, 0);
+                trace_photons(emit, 1, Color ^ scene[id]->emission, root, scene, 0);
             }
         }
         

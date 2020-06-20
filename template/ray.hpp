@@ -5,11 +5,17 @@
 #include "vec3.hpp"
 #include "Coordinate.hpp"
 #include <stdio.h>
+#include <random>
+#include <time.h>
+
+using std::default_random_engine;
 
 //define ray
 
 class Ray
 {
+    private:
+    static default_random_engine e;
     public:
     vec3 origin;
     vec3 direction;
@@ -26,7 +32,7 @@ class Ray
     Ray diffuse(Ray in, vec3 point, vec3 normal) //get random diffused ray
     {
         Coordinate co(normal, point);
-        double r = frand(), theta = 2 * PI * frand();
+        double r = double(e()) / double(e.max()), theta = 2 * PI * double(e()) / double(e.max());
         vec3 out_point(sqrt(r) * cos(theta), sqrt(r) * sin(theta), sqrt(1.0 - r * r));
         return Ray(point, co.inv_trans_vector(out_point).normalize());
     }
@@ -72,3 +78,5 @@ class Ray
         return Ray(point, new_direction);
     }
 };
+
+default_random_engine Ray::e = default_random_engine(time(NULL));

@@ -126,7 +126,7 @@ void Parser::Parse()
     std::regex object_regex("Object(.+?)EndObject");
     std::regex camera_regex("Camera(.+?)EndCamera");
     std::regex effect_regex("Effect(.+?)EndEffect");
-    std::regex algorithm_regex("Algorithm(.+?)EndAlgorithm");
+    std::regex algorithm_regex("Algorithm\\s*\\{\\s*([A-Za-z].+)\\s*\\}\\s*EndAlgorithm");
     std::smatch sm;
     if(std::regex_search(file_content, sm, light_regex)) //parse light
     {
@@ -163,7 +163,7 @@ void Parser::Parse()
     if(std::regex_search(file_content, sm, algorithm_regex))
     {
         std::string algorithm_content = sm[1];
-        Parse_Effect(algorithm_content);
+        Parse_Algorithm(algorithm_content);
     }
     else
     {

@@ -5,10 +5,15 @@
 #include "Mesh.hpp"
 #include <algorithm>
 #include <vector>
+#include <random>
+#include <time.h>
+
+using std::default_random_engine;
 
 class r_Bezier : public object
 {
     private:
+    default_random_engine e;
     double B(int n, int i, double t) const
     {
         return C[n][i] * pow(t, i) * pow(1 - t, n - i);
@@ -55,6 +60,7 @@ class r_Bezier : public object
             }
         }
         M->tree.build(M->T);
+        e.seed(time(NULL));
     }
     r_Bezier(const std::vector<vec3> _controll, vec3 _color, vec3 _emission, double _ratio, Coordinate _co, Refl_t _type)
     {
@@ -90,6 +96,7 @@ class r_Bezier : public object
             }
         }
         M->tree.build(M->T);
+        e.seed(time(NULL));
     }
     void init_Mesh(double start, double end) //t belongs to [start, end]
     {
@@ -97,7 +104,7 @@ class r_Bezier : public object
         vec3 t_start = d_curve(vec3(start, 0, 0)).normalize(), t_end = d_curve(vec3(end, 0, 0)).normalize();
         if(fabs(t_start.x - t_end.x) < 0.001)
         {
-            double t1 = frand() * (end - start) + start;
+            double t1 = (end - start) * double(e()) / double(e.max())+ start;
             if(fabs(t_start.x - (d_curve(vec3(t1, 0, 0)).normalize()).x) > 0.001)
             {
                 init_Mesh(start, t1);
@@ -105,7 +112,7 @@ class r_Bezier : public object
             }
             else
             {
-                double t2 = frand() * (end - start) + start;
+                double t2 = (end - start) * double(e()) / double(e.max()) + start;
                 if(fabs(t_start.x - (d_curve(vec3(t2, 0, 0)).normalize()).x) > 0.001)
                 {
                     init_Mesh(start, t2);

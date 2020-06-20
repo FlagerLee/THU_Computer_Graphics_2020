@@ -48,6 +48,13 @@ class hitpoint
     int dimention; //0: compare x; 1: compare y; 2: compare z
 };
 
+class image_flux
+{
+    public:
+    vec3 flux;
+    int w, h;
+};
+
 double hitpoint::radius = 2.0;
 double hitpoint::decrease = 0.0;
 
@@ -426,6 +433,8 @@ void sppm(Camera cam, const int MAX_PHOTONS, std::vector<object*> scene)
     int width = cam.x_pixel;
     int height = cam.y_pixel;
     int size = width * height;
+
+    vec3* picture = new vec3[width * height];
 
     printf("\nsize of points: %ld\nBuilding kdtree\n", points.size());
     for(int i = 0; i < points.size(); i ++)

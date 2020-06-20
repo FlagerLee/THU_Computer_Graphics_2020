@@ -3,6 +3,9 @@
 //path tracing engine
 #include "ray.hpp"
 #include "Scene.hpp"
+#include <random>
+
+using std::default_random_engine;
 
 const int MAXIMUM_DEPTH = 5; //maximum recursive depth
 
