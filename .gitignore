@@ -35,3 +35,6 @@
 *.tex
 *.bib
 *.pdf
+
+# MacOS
+.DS_Store

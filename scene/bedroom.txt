@@ -1,0 +1,104 @@
+Scene
+{
+    Light
+    {
+        [
+            Shape={Circle; 6.0}
+            Coordinate={(-29.5, 71, -79), (0, 0, 1), (1, 0, 0), (0, 1, 0)}
+            Color={(1, 1, 1)}
+            Ratio={1.0}
+            Material={DIFF}
+            Illumination={(13, 13, 13)}
+        ]
+        [
+            Shape={Circle; 1.5}
+            Coordinate={(45, 60, -70), (-4, -1, 0)}
+            Color={(1, 1, 1)}
+            Ratio={1.0}
+            Material={DIFF};
+            Illumination={(13, 13, 13)}
+        ]
+    }
+    End Light
+    Object
+    {
+        [
+            Shape={Square; 100.0; 150.0}
+            Coordinate={(-50, 0, 50); (1, 0, 0); (0, 0, -1); (0, 1, 0)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+            Texture={texture/marble.png}
+        ]
+        [
+            Shape={Plane; (0, 100, 0); (0, -1, 0)}
+            Coordinate={(0, 0, 0)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Plane; (0, 0, -100); (0, 0, 1)}
+            Coordinate={(0, 0, 0)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Plane; (50, 0, 0); (-1, 0, 0)}
+            Coordinate={(0, 0, 0)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Plane; (-50, 0, 0); (1, 0, 0)}
+            Coordinate={(0, 0, 0)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Mesh; models/lamp.obj; 25.0}
+            Coordinate={(-55, 45, -35), (0, 0, 1), (1, 0, 0), (0, 1, 0)}
+            Color={(0.8039, 0.5843, 0.0470)}
+            Ratio={1.5}
+            Material={DIFF}
+        ]
+        [
+            Shape={Box; 60.0; 50.0; 3.0}
+            Coordinate={(-10, 35, -60), (1, 0, 0), (0, 0, -1), (0, 1, 0)}
+            Color={(1, 1, 1)}
+            Ratio={1.5}
+            Material={DIFF}
+            Texture={texture/wood.png;texture/wood.png;texture/wood.png;texture/wood.png;texture/wood.png;texture/wood.png}
+        ]
+        [
+            Shape={Mesh; models/lamp2.obj; 20.0}
+            Coordinate={(20, 50, -53), (1, 0, 0), (0, 0, -1), (0, 1, 0)}
+            Color={(1, 1, 1)}
+            Ratio={1.5}
+            Material={DIFF}
+        ]
+        [
+            Shape={Rotate_Bezier; models/egg.bzr}
+            Coordinate={(10, 38, -70), (1, 0, 0), (0, 0, -1), (0, 1, 0)}
+            Color={(1, 1, 1)}
+            Ratio={1.5}
+            Material={REFR}
+        ]
+    }
+    End Object
+    Camera
+    {
+        Coordinate={(0, 50, 100), (-1, 0, 0), (0, -1, 0), (0, 0, -1)}
+        x_pixel={1024}
+        y_pixel={1024}
+        x_angle={0.7854}
+        y_angle={0.7854}
+    }
+    End Camera
+    Algorithm
+    {MonteCarlo}
+    End Algorithm
+}

@@ -1,0 +1,86 @@
+Scene
+{
+    Light
+    {
+        [
+            Shape={Circle; 10}
+            Coordinate={(0, 99.99, 0), (1, 0, 0), (0, 0, -1), (0, -1, 0)}
+            Color={(1, 1, 1)}
+            Ratio={1.0}
+            Material={DIFF}
+            Illumination={(12, 12, 12)}
+        ]
+    }
+    End Light
+    Object
+    {
+        [
+            Shape={Square; 100.0; 150.0}
+            Coordinate={(-50, 0, 50); (1, 0, 0); (0, 0, -1); (0, 1, 0)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+            Texture={texture/wood.png}
+        ]
+        [
+            Shape={Square; 100.0; 100.0}
+            Coordinate={(-50, 0, -100); (1, 0, 0); (0, 1, 0); (0, 0, 1)}
+            Color={(1, 1, 1)}
+            Ratio={1.0}
+            Material={DIFF}
+            Texture={texture/background.png}
+        ]
+        [
+            Shape={Plane; (0, 100, 0); (0, -1, 0)}
+            Coordinate={(0, 0, 0)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Square; 150; 100}
+            Coordinate={(50, 0, -100); (0, 0, 1); (0, 1, 0); (-1, 0, 0)}
+            Color={(.4549, .7255, 1)}#74b9ff
+            Ratio={1.0}
+            Material={DIFF}
+            Normal={texture/Wall.png}
+        ]
+        [
+            Shape={Plane; (-50, 0, 0); (1, 0, 0)}
+            Coordinate={(0, 0, 0)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Mesh; models/bunny.obj; 10}
+            Coordinate={(10, 0, -30)}
+            Color={(.9686, .9333, .8824)}
+            Ratio={1.0}
+            Material={DIFF}
+        ]
+        [
+            Shape={Rotate_Bezier; models/vase.bzr}
+            Coordinate={vec3(30, 25, -70), vec3(-1, 0, 0), vec3(0, 0, 1), vec3(0, -1, 0)}
+            Color={(1, 1, 1)}
+            Ratio={1.0}
+            Material={DIFF}
+            Texture={texture/vase.png}
+        ]
+    }
+    End Object
+    Camera
+    {
+        Coordinate={(20, 15, 40), (-1, 0, 0), (0, -1, 0), (0, 0, -1)}
+        x_pixel={1024}
+        y_pixel={1024}
+        x_angle={0.7854}
+        y_angle={0.7854}
+        apreture={0.5}
+        f={35}
+    }
+    End Camera
+    Algorithm
+    {PPM}
+    End Algorithm
+}
